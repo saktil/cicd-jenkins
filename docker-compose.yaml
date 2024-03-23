@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  web:
+    image: "leonswww/node-app-test-new:v1.1"
+    ports:
+      - "8000:8000"
+
+
+
