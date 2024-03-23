@@ -1,13 +1,10 @@
 # node-todo-cicd
 
-Run these commands:
-
-
+## How to run this app
+Install the nodejs
 `sudo apt install nodejs`
 
-
 `sudo apt install npm`
-
 
 `npm install`
 
