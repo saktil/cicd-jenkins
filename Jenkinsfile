@@ -5,8 +5,6 @@ pipeline {
         dockerHubCreds = credentials('dockerHub')
     }
     tools {
-        // Define SonarScanner tool configuration
-        // Replace 'SonarScanner' with the actual name configured in Jenkins
         sonarqube 'SonarScanner'
     }
     stages {
@@ -18,8 +16,13 @@ pipeline {
         stage("SonarQube Analysis") {
             steps {
                 script {
-                    // Run SonarScanner
-                    sh "sonar-scanner"
+                    withSonarQubeEnv('sonar-project.propertiese') {
+                        sh """
+                            sonar-scanner \\
+                            -Dsonar.projectKey= testing\\
+                            -Dsonar.sources=.
+                        """
+                    }
                 }
             }
         }
