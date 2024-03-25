@@ -13,7 +13,7 @@ pipeline {
         }
         stage("SonarQube Analysis") {
             steps {
-                withSonarQubeEnv() {
+                withSonarQubeEnv('YourSonarQubeInstallationName') {
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
