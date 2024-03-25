@@ -1,9 +1,12 @@
 pipeline {
     agent any
     environment {
-        scannerHome = tool 'SonarScanner'
         dockerImage = 'node-app-test-new'
         dockerHubCreds = credentials('dockerHub')
+    }
+    tools {
+        // Define SonarScanner tool configuration
+        nodejs 'SonarScanner'
     }
     stages {
         stage("Clone Code") {
@@ -13,8 +16,9 @@ pipeline {
         }
         stage("SonarQube Analysis") {
             steps {
-                withSonarQubeEnv('YourSonarQubeInstallationName') {
-                    sh "${scannerHome}/bin/sonar-scanner"
+                script {
+                    // Run SonarScanner
+                    sh "sonar-scanner"
                 }
             }
         }
