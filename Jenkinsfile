@@ -6,7 +6,6 @@ pipeline {
                 git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
             }
         }
-        node {
         stage('SCM') {
             checkout scm
         }
@@ -15,7 +14,6 @@ pipeline {
             withSonarQubeEnv() {
             sh "${scannerHome}/bin/sonar-scanner"
             }
-        }
         }
         stage("Build and Test"){
             steps{
