@@ -1,37 +1,46 @@
 pipeline {
     agent any
-    stages{
-        stage("Clone Code"){
-            steps{
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
+    environment {
+        scannerHome = tool 'SonarScanner'
+        dockerImage = 'node-app-test-new'
+        dockerHubCreds = credentials('dockerHub')
+    }
+    stages {
+        stage("Clone Code") {
+            steps {
+                git url: "https://github.com/saktil/cicd-jenkins.git", branch: "master"
             }
         }
-        stage('SCM') {
-            checkout scm
-        }
-        stage('SonarQube Analysis') {
-            def scannerHome = tool 'SonarScanner';
-            withSonarQubeEnv() {
-            sh "${scannerHome}/bin/sonar-scanner"
-            }
-        }
-        stage("Build and Test"){
-            steps{
-                sh "docker build . -t node-app-test-new"
-            }
-        }
-        stage("Push to Docker Hub"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker tag node-app-test-new ${env.dockerHubUser}/node-app-test-new:latest"
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
+        stage("SonarQube Analysis") {
+            steps {
+                withSonarQubeEnv() {
+                    sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
-        stage("Deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
+        stage("Build and Test") {
+            steps {
+                script {
+                    sh "docker build . -t ${dockerImage}"
+                }
+            }
+        }
+        stage("Push to Docker Hub") {
+            steps {
+                script {
+                    docker.withRegistry('', dockerHubCreds) {
+                        sh "docker tag ${dockerImage} ${dockerHubCreds.username}/node-app-test-new:latest"
+                        sh "docker push ${dockerHubCreds.username}/node-app-test-new:latest"
+                    }
+                }
+            }
+        }
+        stage("Deploy") {
+            steps {
+                script {
+                    sh "docker-compose down"
+                    sh "docker-compose up -d"
+                }
             }
         }
     }
