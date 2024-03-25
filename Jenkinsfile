@@ -6,7 +6,8 @@ pipeline {
     }
     tools {
         // Define SonarScanner tool configuration
-        nodejs 'SonarScanner'
+        // Replace 'SonarScanner' with the actual name configured in Jenkins
+        sonarqube 'SonarScanner'
     }
     stages {
         stage("Clone Code") {
