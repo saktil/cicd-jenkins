@@ -8,39 +8,18 @@ pipeline {
             }
         }
 
-        node {
-            stage('SCM') {
-                git 'https://github.com/foo/bar.git'
-            }
-            stage('SonarQube analysis') {
-                def scannerHome = tool 'SonarScanner 4.0'
-                withSonarQubeEnv('My SonarQube Server') {
-                    sh "${scannerHome}/bin/sonar-scanner"
-                }
-            }
-        }
-
-        stage('Build') {
+        stage('SonarQube analysis') {
             steps {
-                echo 'Building the ToDo application on Docker'
-                sh 'docker build . -t todo-app'
-            }
-        }
+                script {
+                    // Downloading and configuring SonarScanner
+                    sh 'curl -L -o sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip'
+                    sh 'unzip sonar-scanner-cli.zip'
+                    sh 'mv sonar-scanner-4.6.2.2472-linux sonar-scanner'
 
-        stage('Deploy') {
-            steps {
-                echo 'Deploying the application on Docker'
-                sh 'docker run -p 8000:8000 -d todo-app'
-            }
-        }
-
-        stage('Upload image') {
-            steps {
-                echo 'Uploading Docker image to Docker Hub'
-                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                    sh "docker tag todo-app leonswww/todo-app:latest"
-                    sh "docker push leonswww/todo-app:latest"
+                    // Running SonarScanner
+                    withSonarQubeEnv('My SonarQube Server') {
+                        sh './sonar-scanner/bin/sonar-scanner'
+                    }
                 }
             }
         }
