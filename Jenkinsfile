@@ -1,53 +1,31 @@
 pipeline {
     agent any
-    environment {
-        dockerImage = 'node-app-test-new'
-        dockerHubCreds = credentials('dockerHub')
-    }
-    tools {
-        sonarqube 'SonarScanner'
-    }
     stages {
-        stage("Clone Code") {
+        stage('Clone the repo') {
             steps {
-                git url: "https://github.com/saktil/cicd-jenkins.git", branch: "master"
+                echo 'Cloning the repository:'
+                git 'https://github.com/mudit097/node-todo-cicd.git'
             }
         }
-        stage("SonarQube Analysis") {
+        stage('Build') {
             steps {
-                script {
-                    withSonarQubeEnv('sonar-project.propertiese') {
-                        sh """
-                            sonar-scanner \\
-                            -Dsonar.projectKey= testing\\
-                            -Dsonar.sources=.
-                        """
-                    }
-                }
+                echo 'Building the ToDo application on Docker'
+                sh 'docker build . -t todo-app'
             }
         }
-        stage("Build and Test") {
+        stage('Deploy') {
             steps {
-                script {
-                    sh "docker build . -t ${dockerImage}"
-                }
+                echo 'Deploying the application on Docker'
+                sh 'docker run -p 8000:8000 -d todo-app'
             }
         }
-        stage("Push to Docker Hub") {
+        stage('Upload image') {
             steps {
-                script {
-                    docker.withRegistry('', dockerHubCreds) {
-                        sh "docker tag ${dockerImage} ${dockerHubCreds.username}/node-app-test-new:latest"
-                        sh "docker push ${dockerHubCreds.username}/node-app-test-new:latest"
-                    }
-                }
-            }
-        }
-        stage("Deploy") {
-            steps {
-                script {
-                    sh "docker-compose down"
-                    sh "docker-compose up -d"
+                echo 'Uploading Docker image to Docker Hub'
+                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    sh "docker tag todo-app leonswww/todo-app:latest"
+                    sh "docker push leonswww/todo-app:latest"
                 }
             }
         }
