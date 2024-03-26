@@ -9,12 +9,19 @@ pipeline {
         }
 
         stage('SCM') {
-            checkout scm
+            steps {
+                checkout scm
+            }
         }
+
         stage('SonarQube Analysis') {
-            def scannerHome = tool 'SonarScanner';
-            withSonarQubeEnv() {
-            sh "${scannerHome}/bin/sonar-scanner"
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv() {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                }
             }
         }
 
@@ -24,12 +31,14 @@ pipeline {
                 sh 'docker build . -t todo-app'
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying the application on Docker'
                 sh 'docker run -p 8000:8000 -d todo-app'
             }
         }
+
         stage('Upload image') {
             steps {
                 echo 'Uploading Docker image to Docker Hub'
