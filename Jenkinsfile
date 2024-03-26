@@ -8,13 +8,14 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Assuming SonarScanner is available in the PATH environment variable
-                    withSonarQubeEnv('sonar-project.properties') {
-                        sh 'sonar-scanner'
-                    }
+        node {
+            stage('SCM') {
+                git 'https://github.com/foo/bar.git'
+            }
+            stage('SonarQube analysis') {
+                def scannerHome = tool 'SonarScanner 4.0'
+                withSonarQubeEnv('My SonarQube Server') {
+                    sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
