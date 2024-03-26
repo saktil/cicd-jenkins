@@ -4,16 +4,16 @@ pipeline {
         stage('Clone the repo') {
             steps {
                 echo 'Cloning the repository:'
-                git 'https://github.com/mudit097/node-todo-cicd.git'
+                git 'https://github.com/saktil/cicd-jenkins.git'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('My SonarQube Server') {
-                        sh "${scannerHome}/bin/sonar-scanner"
+                    // Assuming SonarScanner is available in the PATH environment variable
+                    withSonarQubeEnv('sonar-project.properties') {
+                        sh 'sonar-scanner'
                     }
                 }
             }
