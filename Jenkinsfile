@@ -8,17 +8,11 @@ pipeline {
             }
         }
 
-        stage('SCM') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('SonarQube Analysis') {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv() {
+                    withSonarQubeEnv('My SonarQube Server') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
@@ -46,6 +40,14 @@ pipeline {
                     sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                     sh "docker tag todo-app leonswww/todo-app:latest"
                     sh "docker push leonswww/todo-app:latest"
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
