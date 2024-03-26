@@ -7,6 +7,17 @@ pipeline {
                 git 'https://github.com/mudit097/node-todo-cicd.git'
             }
         }
+
+        stage('SCM') {
+            checkout scm
+        }
+        stage('SonarQube Analysis') {
+            def scannerHome = tool 'SonarScanner';
+            withSonarQubeEnv() {
+            sh "${scannerHome}/bin/sonar-scanner"
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building the ToDo application on Docker'
