@@ -3,6 +3,8 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'todo-app'
         DOCKER_HUB_REPO = 'leonswww/todo-app'
+        SONARQUBE_URL = 'http://sonarqube.example.com:9000' // Update with your SonarQube server URL
+        SONARQUBE_TOKEN = credentials('sonarqube-token') // Create a secret text credential in Jenkins with the SonarQube token ID
     }
     stages {
         stage('Clone the repo') {
@@ -30,6 +32,14 @@ pipeline {
                     sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                     sh "docker tag $DOCKER_IMAGE_NAME $DOCKER_HUB_REPO:latest"
                     sh "docker push $DOCKER_HUB_REPO:latest"
+                }
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                echo 'Running SonarQube analysis'
+                withSonarQubeEnv('SonarQube') {
+                    sh "docker run -e SONAR_HOST_URL=$SONARQUBE_URL -e SONAR_LOGIN=$SONARQUBE_TOKEN -v ${PWD}:/usr/src --rm sonarsource/sonar-scanner-cli"
                 }
             }
         }
