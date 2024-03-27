@@ -3,8 +3,8 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'todo-app'
         DOCKER_HUB_REPO = 'leonswww/todo-app'
-        SONARQUBE_URL = 'http://sonarqube.example.com:9000' // Update with your SonarQube server URL
-        SONARQUBE_TOKEN = credentials('sonarqube-token') // Create a secret text credential in Jenkins with the SonarQube token ID
+        SONARQUBE_URL = 'http://8.215.42.245:9001/' // Update with your SonarQube server URL
+        SONARQUBE_TOKEN = credentials('testing-token') // Create a secret text credential in Jenkins with the SonarQube token ID
     }
     stages {
         stage('Clone the repo') {
