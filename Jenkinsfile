@@ -41,12 +41,5 @@ pipeline {
                 sh 'docker build . -t todo-app'
             }
         }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying the application on Docker'
-                sh 'docker run -p 8000:8000 -d todo-app'
-            }
-        }
     }
 }
