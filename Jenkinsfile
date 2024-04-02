@@ -5,7 +5,7 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_SERVER_URL = 'http://172.28.164.35:9000'
+        SONARQUBE_SERVER_URL = 'http://8.215.42.245:9000'
     }
 
     stages {
