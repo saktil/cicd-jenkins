@@ -1,20 +1,20 @@
 pipeline {
     agent any
     environment {
-        SONARQUBE_SERVER_URL = 'http://8.215.42.245:9000'
+        SONARQUBE_SERVER_URL = 'http://172.28.164.35:9000'
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('Clone the repo') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/saktil/cicd-jenkins.git']])
-                echo 'Git Checkout Completed'
+                echo 'Cloning the repository:'
+                git 'https://github.com/saktil/cicd-jenkins.git'
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
+    stage('SonarQube Analysis') {
+        steps {
+            script {
                     try {
                         withSonarQubeEnv('sonarqube-server') {
                             sh '''mvn clean verify sonar:sonar \
@@ -28,6 +28,20 @@ pipeline {
                         echo "SonarQube analysis failed: ${e.message}"
                     }
                 }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building the ToDo application on Docker'
+                sh 'docker build . -t todo-app'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application on Docker'
+                sh 'docker run -p 8000:8000 -d todo-app'
             }
         }
     }
