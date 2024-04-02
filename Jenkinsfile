@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/saktil/maven-sonar.git']])
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/saktil/cicd-jenkins.git']])
                 echo 'Git Checkout Completed'
             }
         }
