@@ -1,5 +1,13 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven'
+    }
+
+    environment {
+        SONARQUBE_SERVER_URL = 'http://8.215.42.245:9000'
+    }
+
     stages {
         stage('Clone the repo') {
             steps {
@@ -11,9 +19,17 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'sonnar-scanner'
-                    withSonarQubeEnv('sonar.projectKey=testing') {
-                        sh "${scannerHome}/bin/sonar-scanner"
+                    try {
+                        withSonarQubeEnv('sonarqube-server') {
+                            sh '''mvn clean verify sonar:sonar \
+                                   -Dsonar.projectKey=sonar \
+                                   -Dsonar.projectName='sonar' \
+                                   -Dsonar.host.url=${SONARQUBE_SERVER_URL}'''
+                            echo 'SonarQube Analysis Completed'
+                        }
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        echo "SonarQube analysis failed: ${e.message}"
                     }
                 }
             }
@@ -32,24 +48,3 @@ pipeline {
                 sh 'docker run -p 8000:8000 -d todo-app'
             }
         }
-
-        stage('Upload image') {
-            steps {
-                echo 'Uploading Docker image to Docker Hub'
-                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                    sh "docker tag todo-app leonswww/todo-app:latest"
-                    sh "docker push leonswww/todo-app:latest"
-                }
-            }
-        }
-
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-    }
-}
