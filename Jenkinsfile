@@ -22,8 +22,8 @@ pipeline {
                     try {
                         withSonarQubeEnv('sonarqube-server') {
                             sh '''mvn clean verify sonar:sonar \
-                                   -Dsonar.projectKey=testing \
-                                   -Dsonar.projectName='testing' \
+                                   -Dsonar.projectKey=sonar \
+                                   -Dsonar.projectName='sonar' \
                                    -Dsonar.host.url=${SONARQUBE_SERVER_URL}'''
                             echo 'SonarQube Analysis Completed'
                         }
